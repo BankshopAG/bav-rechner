@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UK Vorteilsrechner</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --navy:#0F2544;--navy2:#1A3A6E;--navy3:#1E4080;
+  --or:#E8621A;--orl:#F2874A;--org:rgba(232,98,26,0.15);
+  --bg:#F4F6FA;--bg2:#EDF0F7;--white:#fff;
+  --tx:#0F2544;--txm:#5A6A85;--txd:#8FA0B8;
+  --bd:rgba(15,37,68,0.1);--bdg:rgba(232,98,26,0.3);
+  --green:#1A8C6A;--greenl:#E6F6F0;
+  --red:#C0392B;--redl:#FDECEA;
+  --r:16px;--rs:10px;--rxs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4rem 2rem;position:relative;}
+.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60px;background:var(--bg);clip-path:ellipse(55% 100% at 50% 100%);}
+.hbadge{display:inline-flex;align-items:center;background:rgba(232,98,26,0.2);border:1px solid rgba(232,98,26,0.4);border-radius:100px;padding:5px 14px;font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#F5A070;margin-bottom:1.75rem;}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(2.4rem,5.5vw,4.5rem);font-weight:700;color:#fff;line-height:1.05;letter-spacing:-.02em;max-width:760px;margin-bottom:1.25rem;}
+.hero h1 em{font-style:normal;color:var(--orl);}
+.hero p{font-size:.95rem;color:rgba(255,255,255,0.65);max-width:480px;margin-bottom:3rem;font-weight:300;line-height:1.7;}
+.hcta{display:inline-flex;align-items:center;gap:8px;background:var(--or);color:#fff;padding:13px 28px;border-radius:100px;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:all .2s;}
+.hcta:hover{background:var(--orl);transform:translateY(-2px);box-shadow:0 10px 24px rgba(232,98,26,0.35);}
+
+/* NAV */
+.snav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);padding:.5rem 1.5rem;display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap;}
+.ni{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:100px;font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--txm);text-decoration:none;transition:all .2s;white-space:nowrap;}
+.ni:hover{color:var(--tx);}
+.ni.act{background:var(--org);color:var(--or);}
+.nn{width:16px;height:16px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--txm);transition:all .2s;}
+.ni.act .nn{background:var(--or);color:#fff;}
+.nsep{width:10px;height:1px;background:var(--bd);flex-shrink:0;}
+
+/* LAYOUT */
+.sec{padding:5rem 2rem;max-width:960px;margin:0 auto;}
+.sdiv{height:1px;background:var(--bd);max-width:960px;margin:0 auto;}
+.ey{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--or);margin-bottom:.875rem;}
+.sec h2{font-family:'Syne',sans-serif;font-size:clamp(1.6rem,3.5vw,2.5rem);font-weight:700;letter-spacing:-.02em;color:var(--navy);line-height:1.1;margin-bottom:.625rem;}
+.slead{font-size:.9rem;color:var(--txm);max-width:520px;margin-bottom:2rem;font-weight:300;line-height:1.7;}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--bd);border-radius:var(--r);padding:1.5rem;}
+.card-sm{background:var(--white);border:1px solid var(--bd);border-radius:var(--rs);padding:1rem 1.125rem;}
+
+/* RANGE CONTROLS */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem;}
+.cc{background:var(--white);border:1px solid var(--bd);border-radius:var(--rs);padding:1rem 1.125rem;}
+.ct{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.cl{font-size:11px;color:var(--txm);font-weight:500;}
+.cv{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--or);}
+.cc-sub{font-size:10px;color:var(--txd);margin-top:4px;}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;border-radius:3px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--or);border:2px solid var(--white);box-shadow:0 1px 4px rgba(232,98,26,0.35);cursor:pointer;}
+
+/* METRICS */
+.mr{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem;}
+.mc{background:var(--white);border:1px solid var(--bd);border-radius:var(--rs);padding:1rem 1.125rem;}
+.mc.ft{background:linear-gradient(135deg,rgba(232,98,26,0.06),rgba(232,98,26,0.02));border-color:var(--bdg);}
+.mc.gn{background:var(--greenl);border-color:rgba(26,140,106,0.3);}
+.ml{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--txm);margin-bottom:3px;}
+.mv{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:700;color:var(--navy);line-height:1.1;}
+.mv.or{color:var(--or);}
+.mv.gn{color:var(--green);}
+.ms{font-size:10px;color:var(--txd);margin-top:2px;}
+
+/* BARS */
+.vc{background:var(--white);border:1px solid var(--bd);border-radius:var(--r);padding:1.5rem;margin-bottom:1.5rem;}
+.vt{font-size:9px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--txm);margin-bottom:1.25rem;}
+.br2{margin-bottom:.875rem;}
+.bt2{display:flex;justify-content:space-between;margin-bottom:5px;}
+.bn{font-size:12px;color:var(--tx);font-weight:500;}
+.ba{font-size:12px;color:var(--tx);font-weight:500;}
+.btr{height:7px;background:var(--bg2);border-radius:100px;overflow:hidden;}
+.bf{height:100%;border-radius:100px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+
+/* INSIGHT */
+.ins{background:linear-gradient(135deg,rgba(232,98,26,0.06),rgba(232,98,26,0.02));border:1px solid var(--bdg);border-radius:var(--r);padding:1.5rem 1.75rem;margin-bottom:1.5rem;display:flex;gap:1rem;align-items:flex-start;}
+.ii{width:34px;height:34px;border-radius:50%;background:var(--org);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--or);flex-shrink:0;}
+.it{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:600;color:var(--navy);margin-bottom:3px;}
+.ix{font-size:.8rem;color:var(--txm);line-height:1.7;font-weight:300;}
+
+/* SPREAD */
+.spv{background:var(--white);border:1px solid var(--bd);border-radius:var(--r);padding:1.75rem;margin-bottom:1.5rem;}
+.spc{display:grid;grid-template-columns:1fr 40px 1fr;gap:1.5rem;align-items:start;}
+.spd{display:flex;align-items:center;justify-content:center;padding-top:2rem;color:var(--txd);font-size:1.2rem;}
+.spl{font-size:9px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--txm);margin-bottom:.75rem;}
+.spb{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;line-height:1;}
+.sps{font-size:11px;color:var(--txm);margin-top:4px;line-height:1.5;}
+.spg{margin-top:1.5rem;background:linear-gradient(135deg,rgba(26,140,106,0.08),rgba(26,140,106,0.02));border:1px solid rgba(26,140,106,0.3);border-radius:var(--rs);padding:1.125rem;text-align:center;}
+.spgl{font-size:9px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:3px;}
+.spgv{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:700;color:var(--navy);}
+.spgs{font-size:10px;color:var(--txm);margin-top:2px;}
+.spg-cost{margin-top:.75rem;background:var(--redl);border:1px solid rgba(192,57,43,0.2);border-radius:var(--rs);padding:1rem;text-align:center;}
+.spgc-l{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:2px;}
+.spgc-v{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--red);}
+
+/* CHART */
+.cc2{background:var(--white);border:1px solid var(--bd);border-radius:var(--r);padding:1.5rem;margin-bottom:1.5rem;}
+.ch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;flex-wrap:wrap;gap:8px;}
+.ct2{font-size:9px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--txm);}
+.leg{display:flex;gap:12px;flex-wrap:wrap;}
+.li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txm);}
+.ld{width:7px;height:7px;border-radius:2px;flex-shrink:0;}
+
+/* MODE TOGGLE */
+.mode-toggle{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;}
+.mtab{padding:7px 16px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--white);color:var(--txm);font-family:'Inter',sans-serif;transition:all .2s;}
+.mtab.act{background:var(--org);border-color:var(--bdg);color:var(--or);}
+.mode-hint{font-size:10px;color:var(--txm);padding:4px 10px;background:var(--bg2);border-radius:100px;}
+.mode-hint.live{color:var(--green);background:var(--greenl);}
+
+/* EMP FORM */
+.emp-form{background:var(--white);border:1px solid var(--bd);border-radius:var(--r);padding:1.5rem;margin-bottom:1.25rem;}
+.ef-grid{display:grid;grid-template-columns:repeat(5,1fr) auto;gap:10px;align-items:end;margin-bottom:1rem;}
+.ef-grid2{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--bd);}
+.ef-field{display:flex;flex-direction:column;gap:4px;}
+.ef-field label{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--txm);}
+.ef-field input,.ef-field select{font-family:'Inter',sans-serif;font-size:12px;padding:8px 10px;background:var(--bg);border:1px solid var(--bd);border-radius:var(--rxs);color:var(--tx);outline:none;transition:border-color .2s;}
+.ef-field input:focus,.ef-field select:focus{border-color:var(--bdg);}
+.ef-field select option{background:#fff;}
+
+/* EMP LIST */
+.emp-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
+.ecard{background:var(--white);border:1px solid var(--bd);border-radius:var(--rs);padding:1.125rem;position:relative;transition:border-color .2s;}
+.ecard:hover{border-color:var(--bdg);}
+.del{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--bg2);border:none;color:var(--txm);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;}
+.del:hover{background:var(--redl);color:var(--red);}
+.eav{width:36px;height:36px;border-radius:50%;background:var(--org);border:1px solid var(--bdg);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--or);margin-bottom:.75rem;}
+.en{font-size:12px;font-weight:500;color:var(--navy);margin-bottom:1px;}
+.er{font-size:10px;color:var(--txm);margin-bottom:.75rem;}
+.ew{display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px;}
+.ek{color:var(--txm);}.ev{font-weight:500;color:var(--tx);}
+.erent{margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);}
+.erl{font-size:9px;color:var(--txm);margin-bottom:1px;}
+.erv{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;color:var(--or);}
+
+/* CASHFLOW TABLE */
+.cf-scroll{overflow-x:auto;margin-bottom:1.5rem;}
+.cf-table{width:100%;border-collapse:collapse;font-size:11px;}
+.cf-table th{padding:7px 10px;font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txm);border-bottom:2px solid var(--bd);text-align:right;white-space:nowrap;background:var(--bg);}
+.cf-table th:first-child{text-align:left;}
+.cf-table td{padding:6px 10px;border-bottom:1px solid var(--bd);text-align:right;color:var(--tx);white-space:nowrap;}
+.cf-table td:first-child{text-align:left;font-weight:500;}
+.cf-table tr:hover td{background:var(--bg);}
+.cf-table .pos{color:var(--green);font-weight:500;}
+.cf-table .neg{color:var(--red);font-weight:500;}
+.cf-table .phase-header td{background:var(--navy);color:#fff;font-weight:600;font-size:10px;}
+
+/* WAYS TABLE */
+.ww{overflow-x:auto;margin-bottom:1.5rem;}
+.wt{width:100%;border-collapse:collapse;font-size:12px;}
+.wt th{padding:8px 12px;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--txm);border-bottom:1px solid var(--bd);text-align:left;background:var(--bg);}
+.wt td{padding:11px 12px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;}
+.wt tr.hl td{background:rgba(232,98,26,0.04);}
+.wt tr.hl td:first-child{border-left:3px solid var(--or);}
+.badge{display:inline-block;padding:2px 7px;border-radius:100px;font-size:9px;font-weight:600;}
+.bg2{background:var(--bg2);color:var(--txm);}
+.bo2{background:var(--org);color:var(--or);}
+.yes{color:var(--green);font-weight:500;}
+.no2{color:var(--red);font-weight:500;}
+.part{color:var(--or);font-weight:500;}
+
+/* SUMMARY */
+.sb{background:var(--navy);border-radius:var(--r);padding:2rem;margin-bottom:1.5rem;}
+.sum-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;color:#fff;margin-bottom:1.25rem;}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:1.25rem;}
+.si .sl{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:2px;}
+.si .sv{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--orl);}
+.si .sd{font-size:10px;color:rgba(255,255,255,0.4);margin-top:1px;}
+.stxt{font-size:.8rem;color:rgba(255,255,255,0.5);line-height:1.7;border-top:1px solid rgba(255,255,255,0.1);padding-top:1rem;}
+
+/* INTERNAL PANEL */
+.int-panel{background:var(--bg2);border:2px dashed var(--bd);border-radius:var(--r);margin-bottom:1.5rem;overflow:hidden;}
+.int-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;cursor:pointer;user-select:none;}
+.int-header-left{display:flex;align-items:center;gap:10px;}
+.int-lock{width:32px;height:32px;border-radius:50%;background:var(--navy2);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.int-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--navy);}
+.int-sub{font-size:10px;color:var(--txm);}
+.int-badge{font-size:9px;font-weight:600;padding:3px 8px;border-radius:100px;background:var(--navy);color:#fff;letter-spacing:.08em;text-transform:uppercase;}
+.int-body{display:none;padding:1.5rem;border-top:1px solid var(--bd);background:var(--white);}
+.int-body.open{display:block;}
+.pw-gate{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;}
+.pw-gate input{font-family:'Inter',sans-serif;font-size:13px;padding:8px 12px;border:1px solid var(--bd);border-radius:var(--rs);outline:none;flex:1;max-width:240px;}
+.pw-gate input:focus{border-color:var(--bdg);}
+.pw-content{display:none;}
+.pw-content.unlocked{display:block;}
+
+/* CONTACT */
+.kc{background:var(--white);border:1px solid var(--bd);border-radius:var(--r);padding:2rem;margin-bottom:1.5rem;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.ff{display:flex;flex-direction:column;gap:4px;}
+.ff label{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--txm);}
+.ff input,.ff textarea{font-family:'Inter',sans-serif;font-size:12px;padding:8px 12px;background:var(--bg);border:1px solid var(--bd);border-radius:var(--rxs);color:var(--tx);outline:none;transition:border-color .2s;}
+.ff input:focus,.ff textarea:focus{border-color:var(--bdg);}
+.ff textarea{resize:vertical;min-height:80px;}
+.cig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1.25rem;}
+.cib{background:var(--bg);border-radius:var(--rxs);padding:.875rem;}
+.cil{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--or);margin-bottom:5px;}
+.cit{font-size:12px;color:var(--txm);line-height:1.7;}
+
+/* BUTTONS */
+.bp{display:inline-flex;align-items:center;gap:7px;background:var(--or);color:#fff;padding:11px 22px;border-radius:100px;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;border:none;cursor:pointer;text-decoration:none;transition:all .2s;}
+.bp:hover{background:var(--orl);transform:translateY(-1px);box-shadow:0 6px 18px rgba(232,98,26,0.3);}
+.bo3{display:inline-flex;align-items:center;gap:7px;background:transparent;color:var(--txm);padding:10px 22px;border-radius:100px;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;border:1px solid var(--bd);cursor:pointer;text-decoration:none;transition:all .2s;}
+.bo3:hover{border-color:var(--navy2);color:var(--navy);}
+.brow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:1.25rem;}
+
+/* FADE */
+.fu{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease;}
+.fu.vis{opacity:1;transform:none;}
+.fu.d1{transition-delay:.1s;}.fu.d2{transition-delay:.2s;}.fu.d3{transition-delay:.3s;}
+
+footer{text-align:center;padding:1.5rem;font-size:10px;color:var(--txm);border-top:1px solid var(--bd);}
+
+@media(max-width:680px){
+  .cg,.mr,.emp-list,.sg,.fg,.cig,.ef-grid,.ef-grid2,.spc{grid-template-columns:1fr;}
+  .mr{grid-template-columns:1fr 1fr;}
+  .ef-grid{grid-template-columns:1fr 1fr;}
+  .snav{overflow-x:auto;justify-content:flex-start;padding:.5rem 1rem;}
+  .sec{padding:3.5rem 1.25rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="hero" id="top">
+  <div class="hbadge">Pauschal besteuerte Unterstützungskasse</div>
+  <h1>Mehr Kapital.<br><em>Weniger Steuern.</em><br>Für Ihr Unternehmen.</h1>
+  <p>Berechnen Sie Schritt für Schritt Ihren steuerlichen Vorteil, den Rendite-Spread und den Kapitalfluss Ihrer Belegschaft.</p>
+  <a href="#s1" class="hcta">Jetzt berechnen →</a>
+</div>
+
+<nav class="snav" id="snav">
+  <a href="#s1" class="ni act" data-s="s1"><span class="nn">1</span>Parameter</a><div class="nsep"></div>
+  <a href="#s2" class="ni" data-s="s2"><span class="nn">2</span>Steuervorteil</a><div class="nsep"></div>
+  <a href="#s3" class="ni" data-s="s3"><span class="nn">3</span>Spread</a><div class="nsep"></div>
+  <a href="#s4" class="ni" data-s="s4"><span class="nn">4</span>Kapital</a><div class="nsep"></div>
+  <a href="#s5" class="ni" data-s="s5"><span class="nn">5</span>Mitarbeiter</a><div class="nsep"></div>
+  <a href="#s6" class="ni" data-s="s6"><span class="nn">6</span>Kapitalfluss</a><div class="nsep"></div>
+  <a href="#s7" class="ni" data-s="s7"><span class="nn">7</span>Vergleich</a><div class="nsep"></div>
+  <a href="#s8" class="ni" data-s="s8"><span class="nn">8</span>Ergebnis</a><div class="nsep"></div>
+  <a href="#kontakt" class="ni" data-s="kontakt"><span class="nn">✉</span>Angebot</a>
+</nav>
+
+<!-- S1 PARAMETER -->
+<section class="sec" id="s1">
+  <div class="fu"><p class="ey">Schritt 1 — Parameter</p><h2>Unternehmensparameter</h2>
+  <p class="slead">Schieberegler für schnelle Übersicht — oder individuelle Mitarbeiter in Schritt 5 eintragen.</p></div>
+  <div class="mode-toggle fu d1">
+    <button class="mtab act" id="mt-p" onclick="setMode('p')">Pauschal</button>
+    <button class="mtab" id="mt-d" onclick="setMode('d')">Individuell</button>
+    <span class="mode-hint" id="mode-hint">Schieberegler aktiv</span>
+  </div>
+  <div id="pauschal-block" class="fu d2">
+    <div class="cg">
+      <div class="cc"><div class="ct"><span class="cl">Anzahl Mitarbeiter</span><span class="cv" id="l-ma">5</span></div><input type="range" min="1" max="100" step="1" value="5" id="r-ma"></div>
+      <div class="cc"><div class="ct"><span class="cl">Monatsbeitrag pro MA</span><span class="cv" id="l-bt">250 €</span></div><input type="range" min="50" max="2000" step="50" value="250" id="r-bt"></div>
+      <div class="cc"><div class="ct"><span class="cl">Laufzeit (Jahre)</span><span class="cv" id="l-jr">15 J.</span></div><input type="range" min="5" max="35" step="1" value="15" id="r-jr"></div>
+      <div class="cc"><div class="ct"><span class="cl">Grenzsteuersatz</span><span class="cv" id="l-st">30 %</span></div><input type="range" min="15" max="45" step="1" value="30" id="r-st"></div>
+      <div class="cc"><div class="ct"><span class="cl">Renditezusage MA (p.a.)</span><span class="cv" id="l-rz">2,0 %</span></div><input type="range" min="5" max="50" step="5" value="20" id="r-rz"></div>
+      <div class="cc"><div class="ct"><span class="cl">Kapitalrendite AG (p.a.)</span><span class="cv" id="l-rk">5,0 %</span></div><input type="range" min="25" max="80" step="5" value="50" id="r-rk"></div>
+    </div>
+  </div>
+  <div id="detail-block" style="display:none" class="fu d2">
+    <div style="background:var(--greenl);border:1px solid rgba(26,140,106,0.25);border-radius:var(--rs);padding:.875rem 1.125rem;margin-bottom:1rem;display:flex;gap:.75rem;align-items:center;">
+      <div style="font-size:18px;">✓</div>
+      <div><div style="font-size:12px;font-weight:600;color:var(--green)">Individuelle Mitarbeiterdaten aktiv</div><div style="font-size:11px;color:var(--txm)">Werte werden aus eingetragenen Mitarbeitern berechnet.</div></div>
+    </div>
+    <div class="cg" style="grid-template-columns:repeat(3,1fr)">
+      <div class="cc"><div class="ct"><span class="cl">Anz. MA</span><span class="cv" id="d-ma">—</span></div><div class="cc-sub">eingetragen</div></div>
+      <div class="cc"><div class="ct"><span class="cl">Ø Beitrag</span><span class="cv" id="d-abt">—</span></div><div class="cc-sub">pro Mitarbeiter</div></div>
+      <div class="cc"><div class="ct"><span class="cl">Ø Laufzeit</span><span class="cv" id="d-lz">—</span></div><div class="cc-sub">bis Rentenbeginn</div></div>
+    </div>
+    <div class="cg" style="grid-template-columns:1fr 1fr;margin-top:.75rem">
+      <div class="cc"><div class="ct"><span class="cl">Grenzsteuersatz</span><span class="cv" id="l-st2">30 %</span></div><input type="range" min="15" max="45" step="1" value="30" id="r-st2" oninput="syncSt(this)"></div>
+      <div class="cc"><div class="ct"><span class="cl">Kapitalrendite AG</span><span class="cv" id="l-rk2">5,0 %</span></div><input type="range" min="25" max="80" step="5" value="50" id="r-rk2" oninput="syncRk(this)"></div>
+    </div>
+  </div>
+  <div class="mr fu d3">
+    <div class="mc"><div class="ml">Anzahl MA</div><div class="mv" id="m-ma">—</div><div class="ms" id="m-ma-s">—</div></div>
+    <div class="mc"><div class="ml">Ø Monatsbeitrag</div><div class="mv or" id="m-abt">—</div></div>
+    <div class="mc"><div class="ml">Ø Laufzeit</div><div class="mv" id="m-alz">—</div></div>
+    <div class="mc ft"><div class="ml">Gesamtkapital (realistisch)</div><div class="mv or" id="m-gk">—</div></div>
+  </div>
+  <div class="brow fu"><a href="#s2" class="bp">Steuervorteil →</a><a href="#s5" class="bo3">Mitarbeiter eintragen →</a></div>
+</section>
+<div class="sdiv"></div>
+
+<!-- S2 STEUERVORTEIL -->
+<section class="sec" id="s2">
+  <div class="fu"><p class="ey">Schritt 2 — Steuerersparnis</p><h2>So viel Steuern sparen Sie</h2>
+  <p class="slead">Alle Zuwendungen sind als Betriebsausgabe voll abzugsfähig — ohne Beitragsdeckel.</p></div>
+  <div class="vc fu d1">
+    <div class="vt">Gesamtvergleich über alle MA und Laufzeiten</div>
+    <div class="br2"><div class="bt2"><span class="bn">Gesamtbeiträge UK</span><span class="ba" id="b-ges">—</span></div><div class="btr"><div class="bf" id="bf-ges" style="background:var(--navy2);width:0%"></div></div></div>
+    <div class="br2"><div class="bt2"><span class="bn">Steuerersparnis Firma</span><span class="ba" id="b-st">—</span></div><div class="btr"><div class="bf" id="bf-st" style="background:var(--or);width:0%"></div></div></div>
+    <div class="br2"><div class="bt2"><span class="bn">Netto-Aufwand Firma</span><span class="ba" id="b-net">—</span></div><div class="btr"><div class="bf" id="bf-net" style="background:rgba(232,98,26,0.3);width:0%"></div></div></div>
+    <div class="br2"><div class="bt2"><span class="bn" style="color:var(--txm)">Äquiv. Gehaltserhöhung (inkl. SV)</span><span class="ba" id="b-geh" style="color:var(--txm)">—</span></div><div class="btr"><div class="bf" id="bf-geh" style="background:var(--bg2);width:0%"></div></div></div>
+  </div>
+  <div class="ins fu d2"><div class="ii">↓</div><div><div class="it" id="i2t">—</div><div class="ix" id="i2x">—</div></div></div>
+  <div class="brow fu d3"><a href="#s3" class="bp">Spread-Vorteil →</a></div>
+</section>
+<div class="sdiv"></div>
+
+<!-- S3 SPREAD -->
+<section class="sec" id="s3">
+  <div class="fu"><p class="ey">Schritt 3 — Spread-Vorteil</p><h2>Ihr stiller Vermögensaufbau</h2>
+  <p class="slead">Sie sagen dem Mitarbeiter eine Rendite zu — das Kapital erwirtschaftet mehr. Die Differenz bleibt im Unternehmen.</p></div>
+  <div class="spv fu d1">
+    <div class="spc">
+      <div>
+        <div class="spl">Alle MA erhalten (zugesagt, gesamt)</div>
+        <div class="spb" id="sp-ma" style="color:var(--txm)">—</div>
+        <div class="sps">Garantierte Ablaufleistung<br>bei Ø <span id="sp-rzl">2,0 %</span> zugesagt</div>
+        <div style="margin-top:1rem;font-size:11px;color:var(--txm);line-height:1.6">Versorgungspflicht vollständig gedeckt.</div>
+      </div>
+      <div class="spd">→</div>
+      <div>
+        <div class="spl">Kapital erwirtschaftet (real, gesamt)</div>
+        <div class="spb" id="sp-uk" style="color:var(--or)">—</div>
+        <div class="sps">Tatsächlicher Kapitalwert<br>bei <span id="sp-rkl">5,0 %</span> AG-Rendite</div>
+        <div style="margin-top:1rem;font-size:11px;color:var(--txm);line-height:1.6">Mehrertrag verbleibt im Unternehmen.</div>
+      </div>
+    </div>
+    <div class="spg">
+      <div class="spgl" id="sp-gain-label">Unternehmensgewinn durch Rendite-Spread</div>
+      <div class="spgv" id="sp-gain">—</div>
+      <div class="spgs" id="sp-gains">—</div>
+    </div>
+  </div>
+  <div class="ins fu d2"><div class="ii">★</div><div><div class="it" id="i3t">—</div><div class="ix" id="i3x">—</div></div></div>
+  <div class="brow fu d3"><a href="#s4" class="bp">Kapitalentwicklung →</a></div>
+</section>
+<div class="sdiv"></div>
+
+<!-- S4 KAPITAL -->
+<section class="sec" id="s4">
+  <div class="fu"><p class="ey">Schritt 4 — Kapitalentwicklung</p><h2>MA-Rendite vs. AG-Kapital</h2>
+  <p class="slead">Zwei Linien: Was dem Mitarbeiter zugesagt wird — und was das Kapital tatsächlich erwirtschaftet.</p></div>
+  <div class="mr fu d1" style="grid-template-columns:repeat(3,1fr)">
+    <div class="mc"><div class="ml">Kapital (MA-Rendite zugesagt)</div><div class="mv" id="rk-m1">—</div><div class="ms" id="rk-m1-sub">Versorgungspflicht</div></div>
+    <div class="mc ft"><div class="ml">Kapital (AG-Rendite real)</div><div class="mv or" id="rk-m2">—</div><div class="ms">tatsächlicher Wert</div></div>
+    <div class="mc gn"><div class="ml">Netto-Spread</div><div class="mv gn" id="rk-m3">—</div><div class="ms">Unternehmensgewinn</div></div>
+  </div>
+  <div class="cc2 fu d2">
+    <div class="ch">
+      <div class="ct2">Kapitalentwicklung Gesamtportfolio</div>
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:var(--txd)"></div>Eingezahlt</div>
+        <div class="li"><div class="ld" style="background:var(--navy2)"></div>MA-Rendite (zugesagt)</div>
+        <div class="li"><div class="ld" style="background:var(--or)"></div>AG-Rendite (real)</div>
+      </div>
+    </div>
+    <div style="position:relative;height:240px"><canvas id="rendChart" role="img" aria-label="Kapitalentwicklung">Kapitalentwicklung.</canvas></div>
+  </div>
+  <div class="brow fu d3"><a href="#s5" class="bp">Mitarbeiter →</a></div>
+</section>
+<div class="sdiv"></div>
+
+<!-- S5 MITARBEITER -->
+<section class="sec" id="s5">
+  <div class="fu"><p class="ey">Schritt 5 — Mitarbeiter</p><h2>Individuelle Belegschaft</h2>
+  <p class="slead">Jeden Mitarbeiter einzeln eintragen. Rentenbeginnalter, Auszahlungsart und Renditezusage individuell einstellbar.</p></div>
+  <div class="emp-form fu d1">
+    <div class="ef-grid">
+      <div class="ef-field"><label>Name</label><input type="text" id="ef-name" placeholder="Max Mustermann"></div>
+      <div class="ef-field"><label>Aktuelles Alter</label><input type="number" id="ef-age" min="18" max="65" value="35"></div>
+      <div class="ef-field"><label>Monatsbeitrag (€)</label><input type="number" id="ef-bt" min="50" max="10000" value="250"></div>
+      <div class="ef-field"><label>Rentenbeginn-Alter</label><input type="number" id="ef-rba" min="55" max="75" value="67"></div>
+      <div class="ef-field"><label>Renditezusage (%)</label><input type="number" id="ef-rz" min="0.5" max="10" step="0.5" value="2"></div>
+      <div class="ef-field"><label>&nbsp;</label></div>
+    </div>
+    <div class="ef-grid2">
+      <div class="ef-field"><label>Auszahlungsart</label>
+        <select id="ef-pay"><option value="rente">Monatliche Rente</option><option value="kapital">Einmalkapital</option></select>
+      </div>
+      <div class="ef-field"><label>Rentenfaktor (wenn Rente)</label><input type="number" id="ef-rf" min="10" max="30" value="16"></div>
+      <div class="ef-field"><label>Rentenphase (Jahre)</label><input type="number" id="ef-rd" min="10" max="30" value="20"></div>
+      <div class="ef-field"><label>&nbsp;</label><button class="bp" onclick="addEmployee()" style="width:100%;justify-content:center">+ Hinzufügen</button></div>
+    </div>
+  </div>
+  <div class="mode-toggle fu d2" id="emp-tabs"><span style="font-size:10px;color:var(--txm);font-weight:600;text-transform:uppercase;letter-spacing:.1em">Eingetragene Mitarbeiter:</span></div>
+  <div class="emp-list fu d3" id="emp-list">
+    <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--txm);font-size:13px;border:1px dashed var(--bd);border-radius:var(--rs)">Noch keine Mitarbeiter eingetragen.</div>
+  </div>
+  <div class="ins fu"><div class="ii">♦</div><div><div class="it" id="i5t">—</div><div class="ix" id="i5x">—</div></div></div>
+  <div class="brow fu"><a href="#s6" class="bp">Kapitalfluss →</a></div>
+</section>
+<div class="sdiv"></div>
+
+<!-- S6 KAPITALFLUSS -->
+<section class="sec" id="s6">
+  <div class="fu"><p class="ey">Schritt 6 — Kapitalfluss</p><h2>Jahresweise Hochrechnung</h2>
+  <p class="slead">Ansparphase: Kapital wächst. Rentenphase: Kapital fließt ab. Transparent dargestellt.</p></div>
+  <div class="mr fu d1">
+    <div class="mc"><div class="ml">Ges.-Kapital aufgebaut</div><div class="mv or" id="cf-m1">—</div></div>
+    <div class="mc ft"><div class="ml">Kapital im Aufbau</div><div class="mv or" id="cf-m2">—</div></div>
+    <div class="mc"><div class="ml">Ges.-Rentenzahlungen</div><div class="mv" id="cf-m3">—</div></div>
+    <div class="mc gn"><div class="ml">Netto-Unternehmenskapital</div><div class="mv gn" id="cf-m4">—</div></div>
+  </div>
+  <div class="cc2 fu d2">
+    <div class="ch">
+      <div class="ct2">Kapitalfluss im Zeitverlauf</div>
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:var(--navy2)"></div>Kapitalaufbau</div>
+        <div class="li"><div class="ld" style="background:var(--green)"></div>Spread-Gewinn</div>
+        <div class="li"><div class="ld" style="background:var(--red)"></div>Rentenauszahlung</div>
+      </div>
+    </div>
+    <div style="position:relative;height:260px"><canvas id="cfChart" role="img" aria-label="Kapitalfluss">Kapitalfluss.</canvas></div>
+  </div>
+  <div class="fu d3" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px;">
+    <div style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--txm)">Jahrestabelle</div>
+    <button class="bo3" style="font-size:11px;padding:6px 14px;" onclick="toggleTable()">Tabelle ein-/ausblenden</button>
+  </div>
+  <div id="cf-table-wrap" style="display:none" class="cf-scroll fu">
+    <table class="cf-table" id="cf-table"></table>
+  </div>
+  <div class="ins fu"><div class="ii">→</div><div><div class="it" id="i6t">—</div><div class="ix" id="i6x">—</div></div></div>
+  <div class="brow fu"><a href="#s7" class="bp">Vergleich →</a></div>
+</section>
+<div class="sdiv"></div>
+
+<!-- INTERNAL PANEL: hidden in DOM, opened via floating button -->
+<div id="intern-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,37,68,0.6);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:var(--white);border-radius:var(--r);padding:2rem;width:min(660px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,0.25);position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:16px;">🔒</div>
+        <div><div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--navy)">Interne Kostenparameter</div><div style="font-size:11px;color:var(--txm)">Nur für interne Nutzung — nicht für Kunden sichtbar</div></div>
+      </div>
+      <button onclick="closeInternal()" style="background:var(--bg2);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--txm)">×</button>
+    </div>
+    <div class="pw-gate" id="pw-gate-modal">
+      <input type="password" id="pw-input" placeholder="Passwort eingeben..." onkeydown="if(event.key==='Enter')checkPw()" style="flex:1;font-family:'Inter',sans-serif;font-size:13px;padding:8px 12px;border:1px solid var(--bd);border-radius:var(--rs);outline:none;">
+      <button class="bp" onclick="checkPw()" style="padding:8px 16px;font-size:12px">Entsperren</button>
+      <span id="pw-msg" style="font-size:11px;color:var(--red)"></span>
+    </div>
+    <div class="pw-content" id="pw-content">
+      <div style="font-size:11px;color:var(--txm);margin-bottom:1.25rem;padding:.875rem;background:var(--bg);border-radius:var(--rs);line-height:1.6">Kosten fließen in die Netto-Spread-Berechnung ein. Im Kundengespräch wird <strong>nur der Netto-Spread</strong> angezeigt — ohne Kostendetails.</div>
+      <div class="cg">
+        <div class="cc">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+            <div><div style="font-size:11px;font-weight:600;color:var(--tx)">PSV-Beitrag</div><div style="font-size:10px;color:var(--txm)">auf Versorgungsvolumen p.a.</div></div>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="cost-psv-on" checked onchange="updateAll()"><span style="font-size:11px;color:var(--txm)">aktiv</span></label>
+          </div>
+          <div class="ct"><span class="cl">PSV-Beitragssatz (‰)</span><span class="cv" id="l-psv">1,4 ‰</span></div>
+          <input type="range" min="0.1" max="5" step="0.1" value="1.4" id="r-psv">
+        </div>
+        <div class="cc">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+            <div><div style="font-size:11px;font-weight:600;color:var(--tx)">UK Einrichtungsgebühr</div><div style="font-size:10px;color:var(--txm)">einmalig auf Versorgungssumme</div></div>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="cost-einr-on" checked onchange="updateAll()"><span style="font-size:11px;color:var(--txm)">aktiv</span></label>
+          </div>
+          <div class="ct"><span class="cl">Einrichtungsgebühr (%)</span><span class="cv" id="l-einr">1,5 %</span></div>
+          <input type="range" min="0.5" max="3" step="0.1" value="1.5" id="r-einr">
+        </div>
+        <div class="cc">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+            <div><div style="font-size:11px;font-weight:600;color:var(--tx)">Jahrespauschale UK</div><div style="font-size:10px;color:var(--txm)">pro Mitarbeiter p.a.</div></div>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="cost-paus-on" checked onchange="updateAll()"><span style="font-size:11px;color:var(--txm)">aktiv</span></label>
+          </div>
+          <div class="ct"><span class="cl">Pauschale (€/MA)</span><span class="cv" id="l-paus">50 €</span></div>
+          <input type="range" min="20" max="300" step="10" value="50" id="r-paus">
+        </div>
+        <div class="cc">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+            <div><div style="font-size:11px;font-weight:600;color:var(--tx)">Investment-Einrichtung</div><div style="font-size:10px;color:var(--txm)">auf Beiträge (max. 35 J. Laufzeit)</div></div>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="cost-inv-on" checked onchange="updateAll()"><span style="font-size:11px;color:var(--txm)">aktiv</span></label>
+          </div>
+          <div class="ct"><span class="cl">Investm.-Gebühr (%)</span><span class="cv" id="l-inv">7,5 %</span></div>
+          <input type="range" min="1" max="15" step="0.5" value="7.5" id="r-inv">
+        </div>
+      </div>
+      <div class="mr" style="grid-template-columns:repeat(3,1fr);margin-top:1rem">
+        <div class="mc"><div class="ml">PSV gesamt</div><div class="mv" id="cost-psv-total">—</div></div>
+        <div class="mc"><div class="ml">UK-Einrichtung</div><div class="mv" id="cost-einr-total">—</div></div>
+        <div class="mc"><div class="ml">Invest.-Gebühr</div><div class="mv" id="cost-inv-total">—</div></div>
+      </div>
+      <div class="mc ft" style="margin-top:.75rem;border-radius:var(--rs);padding:1rem">
+        <div class="ml">Gesamtkosten (aktiviert) — fließen in Netto-Spread ein</div>
+        <div class="mv or" id="cost-total">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING INTERNAL BUTTON -->
+<button id="intern-fab" onclick="openInternal()" title="Interne Kostenparameter" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:1000;width:44px;height:44px;border-radius:50%;background:var(--navy);border:none;cursor:pointer;box-shadow:0 4px 16px rgba(15,37,68,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s;" onmouseover="this.style.background='#1A3A6E'" onmouseout="this.style.background='var(--navy)'">🔒</button>
+
+<div class="sdiv"></div>
+
+<!-- S7 VERGLEICH -->
+<section class="sec" id="s7">
+  <div class="fu"><p class="ey">Schritt 7 — Die 5 Durchführungswege</p><h2>Warum die Unterstützungskasse?</h2>
+  <p class="slead">Nur einer kombiniert unbegrenzte Beiträge, Bilanzneutralität und Spread-Vorteil.</p></div>
+  <div class="ww fu d1">
+    <table class="wt">
+      <thead><tr><th>Durchführungsweg</th><th>Beitragslimit</th><th>AG steuerfrei</th><th>SV-frei</th><th>Bilanzneutral</th><th>Spread</th></tr></thead>
+      <tbody>
+        <tr><td>Direktversicherung <span class="badge bg2">Häufig</span></td><td class="no2">Ja (7.728 €/J.)</td><td class="yes">Ja</td><td class="yes">Ja</td><td class="yes">Ja</td><td class="no2">Nein</td></tr>
+        <tr><td>Pensionskasse</td><td class="no2">Ja (7.728 €/J.)</td><td class="yes">Ja</td><td class="yes">Ja</td><td class="yes">Ja</td><td class="no2">Nein</td></tr>
+        <tr><td>Pensionsfonds</td><td class="no2">Ja (7.728 €/J.)</td><td class="yes">Ja</td><td class="yes">Ja</td><td class="yes">Ja</td><td class="no2">Nein</td></tr>
+        <tr><td>Direktzusage</td><td class="yes">Nein</td><td class="yes">Ja</td><td class="yes">Ja</td><td class="no2">Nein</td><td class="part">Teilw.</td></tr>
+        <tr class="hl"><td><strong>Unterstützungskasse</strong> <span class="badge bo2">Empfohlen</span></td><td class="yes">Nein — unbegrenzt</td><td class="part">Pauschst.</td><td class="yes">Ja</td><td class="yes">Ja</td><td class="yes">Ja</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="brow fu d2"><a href="#s8" class="bp">Gesamtergebnis →</a></div>
+</section>
+<div class="sdiv"></div>
+
+<!-- S8 ERGEBNIS -->
+<section class="sec" id="s8">
+  <div class="fu"><p class="ey">Schritt 8 — Zusammenfassung</p><h2>Ihr Gesamtergebnis</h2></div>
+  <div class="sb fu d1"><div class="sum-title">Ergebnisübersicht</div><div class="sg" id="sum-grid"></div><div class="stxt" id="sum-text">—</div></div>
+  <div class="brow fu d2"><a href="#kontakt" class="bp">Angebot anfordern →</a><button class="bo3" onclick="window.print()">Drucken</button></div>
+</section>
+<div class="sdiv"></div>
+
+<!-- KONTAKT -->
+<section class="sec" id="kontakt">
+  <div class="fu"><p class="ey">Unverbindlich</p><h2>Lassen Sie uns sprechen</h2></div>
+  <div class="kc fu d1">
+    <div class="fg">
+      <div class="ff"><label>Name</label><input type="text" placeholder="Max Mustermann"></div>
+      <div class="ff"><label>Unternehmen</label><input type="text" placeholder="Musterfirma GmbH"></div>
+      <div class="ff"><label>E-Mail</label><input type="email" placeholder="max@firma.de"></div>
+      <div class="ff"><label>Telefon</label><input type="tel" placeholder="+49 ..."></div>
+      <div class="ff"><label>Mitarbeiter</label><input type="number" placeholder="Anzahl"></div>
+      <div class="ff"><label>Wunschtermin</label><input type="text" placeholder="Mo–Mi, vormittags"></div>
+    </div>
+    <div class="ff"><label>Ihre Fragen</label><textarea placeholder="Was beschäftigt Sie zum Thema bAV?"></textarea></div>
+    <div class="cig">
+      <div class="cib"><div class="cil">Direktkontakt</div><div class="cit">Ihr Name<br>+49 000 000000<br>mail@ihredomain.de</div></div>
+      <div class="cib"><div class="cil">So geht es weiter</div><div class="cit">1. Kostenlose Erstanalyse<br>2. Individuelles Angebot<br>3. Umsetzung &amp; Begleitung</div></div>
+    </div>
+  </div>
+  <div class="brow fu d2"><button class="bp">Anfrage absenden →</button></div>
+</section>
+<footer><p>© 2025 Ihr Name · Betriebliche Altersversorgung · Alle Berechnungen dienen der unverbindlichen Veranschaulichung.</p></footer>
+
+<script>
+// ─── STATE ───
+let employees=[], currentMode='p', rdChart=null, cfChart=null;
+const PW='intern2025';
+
+// ─── UTILS ───
+function fe(n){if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2).replace('.',',')+' Mio. €';if(Math.abs(n)>=1000)return Math.round(n/1000)+'T€';return Math.round(n).toLocaleString('de-DE')+' €';}
+function fp(n){return(+n).toFixed(1).replace('.',',')+' %';}
+function fv(m,y,r){if(y<=0)return 0;if(r<=0)return m*12*y;const rm=r/12,n=y*12;return m*((Math.pow(1+rm,n)-1)/rm)*(1+rm);}
+function g(id){return+document.getElementById(id).value;}
+function setRC(el){const p=((+el.value-+el.min)/(+el.max-+el.min)*100).toFixed(1);el.style.background=`linear-gradient(to right,#E8621A 0%,#E8621A ${p}%,#EDF0F7 ${p}%)`;}
+document.querySelectorAll('input[type=range]').forEach(el=>{setRC(el);el.addEventListener('input',()=>{setRC(el);updateAll();});});
+
+// ─── MODE ───
+function setMode(m){
+  currentMode=m;
+  document.getElementById('mt-p').classList.toggle('act',m==='p');
+  document.getElementById('mt-d').classList.toggle('act',m==='d');
+  updateModeDisplay();updateAll();
+}
+function updateModeDisplay(){
+  const hasMA=employees.length>0;
+  const useD=currentMode==='d'&&hasMA;
+  document.getElementById('pauschal-block').style.display='block';
+  document.getElementById('detail-block').style.display=useD?'block':'none';
+  const hint=document.getElementById('mode-hint');
+  if(useD){hint.textContent=employees.length+' MA aktiv — individuelle Daten';hint.className='mode-hint live';}
+  else if(hasMA){hint.textContent=employees.length+' MA eingetragen — Schieberegler aktiv';hint.className='mode-hint';}
+  else{hint.textContent='Schieberegler aktiv';hint.className='mode-hint';}
+}
+function syncSt(el){setRC(el);document.getElementById('r-st').value=el.value;setRC(document.getElementById('r-st'));document.getElementById('l-st').textContent=el.value+' %';document.getElementById('l-st2').textContent=el.value+' %';updateAll();}
+function syncRk(el){setRC(el);document.getElementById('r-rk').value=el.value;setRC(document.getElementById('r-rk'));document.getElementById('l-rk').textContent=fp(el.value/10);document.getElementById('l-rk2').textContent=fp(el.value/10);updateAll();}
+
+// ─── INTERNAL PANEL ───
+let pwUnlocked=false;
+function openInternal(){const m=document.getElementById('intern-modal');m.style.display='flex';}
+function closeInternal(){document.getElementById('intern-modal').style.display='none';}
+// Close on backdrop click
+document.getElementById('intern-modal').addEventListener('click',function(e){if(e.target===this)closeInternal();});
+function checkPw(){
+  const v=document.getElementById('pw-input').value;
+  if(v===PW){
+    pwUnlocked=true;
+    document.getElementById('pw-content').classList.add('unlocked');
+    document.getElementById('pw-gate-modal').style.display='none';
+    document.getElementById('intern-fab').style.background='#1A8C6A';
+    document.getElementById('intern-fab').textContent='⚙️';
+    document.getElementById('pw-msg').textContent='';
+    updateAll();
+  }else{document.getElementById('pw-msg').textContent='Falsches Passwort';}
+}
+function toggleTable(){const w=document.getElementById('cf-table-wrap');w.style.display=w.style.display==='none'?'block':'none';}
+
+// ─── EMPLOYEES ───
+function addEmployee(){
+  const name=document.getElementById('ef-name').value.trim()||'Mitarbeiter '+(employees.length+1);
+  const age=parseInt(document.getElementById('ef-age').value)||35;
+  const bt=parseInt(document.getElementById('ef-bt').value)||250;
+  const rba=parseInt(document.getElementById('ef-rba').value)||67;
+  const rz=parseFloat(document.getElementById('ef-rz').value)||2;
+  const pay=document.getElementById('ef-pay').value;
+  const rf=parseInt(document.getElementById('ef-rf').value)||16;
+  const rd=parseInt(document.getElementById('ef-rd').value)||20;
+  const lz=Math.max(1,rba-age);
+  employees.push({id:Date.now(),name,age,bt,rba,rz,pay,rf,rd,lz});
+  document.getElementById('ef-name').value='';
+  if(employees.length===1){currentMode='d';document.getElementById('mt-p').classList.remove('act');document.getElementById('mt-d').classList.add('act');}
+  renderEmployees();updateModeDisplay();updateAll();
+}
+function removeEmployee(id){
+  employees=employees.filter(e=>e.id!==id);
+  if(employees.length===0){currentMode='p';document.getElementById('mt-p').classList.add('act');document.getElementById('mt-d').classList.remove('act');}
+  renderEmployees();updateModeDisplay();updateAll();
+}
+function initials(n){return n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'MA';}
+
+function renderEmployees(){
+  const list=document.getElementById('emp-list');
+  if(!employees.length){list.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--txm);font-size:13px;border:1px dashed var(--bd);border-radius:var(--rs)">Noch keine Mitarbeiter eingetragen.</div>';return;}
+  const rk=g('r-rk')/1000;
+  list.innerHTML=employees.map(e=>{
+    const kapMA=fv(e.bt,e.lz,e.rz/100);
+    let rentStr='';
+    if(e.pay==='rente'){const mr=Math.round(kapMA/(e.rd*12));rentStr=mr.toLocaleString('de-DE')+' €/Monat ('+e.rd+' J.)';}
+    else{rentStr=fe(kapMA)+' Einmalkapital';}
+    return`<div class="ecard">
+      <button class="del" onclick="removeEmployee(${e.id})">×</button>
+      <div class="eav">${initials(e.name)}</div>
+      <div class="en">${e.name}</div>
+      <div class="er">Rentenbeginn: ${e.rba} · ${e.pay==='rente'?'Rente':'Kapital'}</div>
+      <div class="ew"><span class="ek">Alter</span><span class="ev">${e.age} J.</span></div>
+      <div class="ew"><span class="ek">Monatsbeitrag</span><span class="ev">${e.bt.toLocaleString('de-DE')} €</span></div>
+      <div class="ew"><span class="ek">Laufzeit bis Rente</span><span class="ev">${e.lz} J.</span></div>
+      <div class="ew"><span class="ek">Renditezusage</span><span class="ev">${fp(e.rz)}</span></div>
+      <div class="erent"><div class="erl">Versorgungsleistung ab ${e.rba}</div><div class="erv">${rentStr}</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ─── COSTS ───
+function calcCosts(gb, versVolumen, ma_count, avgLz){
+  if(!pwUnlocked) return 0;
+  let total=0;
+  // PSV: ‰ auf Versorgungsvolumen p.a. × Laufzeit
+  if(document.getElementById('cost-psv-on').checked){
+    const psv_prom=g('r-psv')/1000;
+    const psv=versVolumen*psv_prom*avgLz;
+    document.getElementById('cost-psv-total').textContent=fe(psv);
+    total+=psv;
+  } else document.getElementById('cost-psv-total').textContent='—';
+  // Einrichtungsgebühr: % auf Versorgungssumme
+  if(document.getElementById('cost-einr-on').checked){
+    const einr_pct=g('r-einr')/100;
+    const einr=versVolumen*einr_pct;
+    document.getElementById('cost-einr-total').textContent=fe(einr);
+    total+=einr;
+  } else document.getElementById('cost-einr-total').textContent='—';
+  // Jahrespauschale: €/MA/Jahr × MA × Laufzeit
+  if(document.getElementById('cost-paus-on').checked){
+    const paus=g('r-paus')*ma_count*avgLz;
+    // no display needed here, included in total
+    total+=paus;
+  }
+  // Investment: % auf Beiträge, max Laufzeit 35J, verrechnet über Monate=Laufzeit*12 (fronted)
+  if(document.getElementById('cost-inv-on').checked){
+    const inv_pct=g('r-inv')/100;
+    const lzCapped=Math.min(avgLz,35);
+    const inv=gb*inv_pct; // total beiträge × pct
+    document.getElementById('cost-inv-total').textContent=fe(inv);
+    total+=inv;
+  } else document.getElementById('cost-inv-total').textContent='—';
+  document.getElementById('cost-total').textContent=fe(total);
+  return total;
+}
+
+// ─── MAIN ───
+function updateAll(){
+  const st=g('r-st')/100, rk=g('r-rk')/1000;
+  const useD=currentMode==='d'&&employees.length>0;
+  const hasMA=employees.length>0;
+
+  // Labels
+  document.getElementById('l-ma').textContent=g('r-ma');
+  document.getElementById('l-jr').textContent=g('r-jr')+' J.';
+  document.getElementById('l-bt').textContent=g('r-bt').toLocaleString('de-DE')+' €';
+  document.getElementById('l-st').textContent=Math.round(st*100)+' %';
+  document.getElementById('l-rz').textContent=fp(g('r-rz')/10);
+  document.getElementById('l-rk').textContent=fp(rk*100);
+  if(pwUnlocked){
+    document.getElementById('l-psv').textContent=g('r-psv')+' ‰';
+    document.getElementById('l-einr').textContent=fp(g('r-einr'));
+    document.getElementById('l-paus').textContent=g('r-paus')+' €';
+    document.getElementById('l-inv').textContent=fp(g('r-inv'));
+  }
+
+  // Aggregate
+  let ma_count,avgLz,totalMonthly,gb,avgRz,versVolumen;
+  if(useD){
+    ma_count=employees.length;
+    avgLz=Math.round(employees.reduce((s,e)=>s+e.lz,0)/ma_count);
+    totalMonthly=employees.reduce((s,e)=>s+e.bt,0);
+    gb=employees.reduce((s,e)=>s+e.bt*12*e.lz,0);
+    avgRz=employees.reduce((s,e)=>s+e.rz,0)/ma_count;
+    versVolumen=employees.reduce((s,e)=>s+fv(e.bt,e.lz,e.rz/100),0);
+    document.getElementById('d-ma').textContent=ma_count;
+    document.getElementById('d-abt').textContent=Math.round(totalMonthly/ma_count).toLocaleString('de-DE')+' €';
+    document.getElementById('d-lz').textContent=avgLz+' J.';
+    document.getElementById('l-st2').textContent=Math.round(st*100)+' %';
+    document.getElementById('l-rk2').textContent=fp(rk*100);
+  } else {
+    ma_count=g('r-ma'); avgLz=g('r-jr');
+    totalMonthly=g('r-bt')*ma_count;
+    gb=totalMonthly*12*avgLz;
+    avgRz=g('r-rz')/10;
+    versVolumen=fv(g('r-bt'),avgLz,avgRz/100)*ma_count;
+  }
+  updateModeDisplay();
+  const steuer=gb*st, netto=gb-steuer, gehalt=gb*1.2;
+  const vorteil=gehalt-netto;
+
+  // S1 metrics
+  const gkReal=useD?employees.reduce((s,e)=>s+fv(e.bt,e.lz,(e.rz/100+rk)/2),0):fv(g('r-bt'),avgLz,(avgRz/100+rk)/2)*ma_count;
+  document.getElementById('m-ma').textContent=ma_count;
+  document.getElementById('m-ma-s').textContent=useD?'individuell':'Schieberegler';
+  document.getElementById('m-abt').textContent=Math.round(totalMonthly/ma_count).toLocaleString('de-DE')+' €';
+  document.getElementById('m-alz').textContent=avgLz+' J.';
+  document.getElementById('m-gk').textContent=fe(gkReal);
+
+  // S2
+  const mx=gehalt;
+  ['ges','st','net','geh'].forEach((k,i)=>{
+    const vals=[gb,steuer,netto,gehalt];
+    document.getElementById('b-'+k).textContent=fe(vals[i]);
+    document.getElementById('bf-'+k).style.width=Math.round(vals[i]/mx*100)+'%';
+  });
+  const vPct=Math.round(vorteil/gehalt*100);
+  document.getElementById('i2t').textContent=fe(vorteil)+' günstiger als Gehaltserhöhung ('+vPct+' %)';
+  document.getElementById('i2x').textContent='Gesamtbeiträge '+fe(gb)+' · Steuerersparnis '+fe(steuer)+' · Netto-Aufwand '+fe(netto)+' vs. '+fe(gehalt)+' Gehaltserhöhung.';
+
+  // S3 Spread
+  const kapMA=useD?employees.reduce((s,e)=>s+fv(e.bt,e.lz,e.rz/100),0):fv(g('r-bt'),avgLz,avgRz/100)*ma_count;
+  const kapUK=useD?employees.reduce((s,e)=>s+fv(e.bt,e.lz,rk),0):fv(g('r-bt'),avgLz,rk)*ma_count;
+  const spreadBrutto=kapUK-kapMA;
+  const costs=calcCosts(gb,versVolumen,ma_count,avgLz);
+  const spreadNetto=spreadBrutto-costs;
+  document.getElementById('sp-rzl').textContent=fp(avgRz);
+  document.getElementById('sp-rkl').textContent=fp(rk*100);
+  document.getElementById('sp-ma').textContent=fe(kapMA);
+  document.getElementById('sp-uk').textContent=fe(kapUK);
+  // Always show net spread to customer (costs silently deducted when unlocked)
+  const displaySpread = pwUnlocked ? spreadNetto : spreadBrutto;
+  const displayLabel = pwUnlocked && costs>0 ? 'Unternehmensgewinn (nach Kosten)' : 'Unternehmensgewinn durch Rendite-Spread';
+  document.getElementById('sp-gain-label').textContent=displayLabel;
+  document.getElementById('sp-gain').textContent='+'+fe(displaySpread);
+  document.getElementById('sp-gains').textContent='Faktor '+(kapUK/Math.max(kapMA,1)).toFixed(2).replace('.',',')+'x · verbleibt im Unternehmen'+(pwUnlocked&&costs>0?' (Kosten bereits verrechnet)':'');
+
+  // S4 Chart
+  const maxLz=useD?Math.max(...employees.map(e=>e.lz)):avgLz;
+  const steps=Math.min(maxLz,25);
+  const labs=[],dE=[],dMA=[],dAG=[];
+  for(let i=0;i<=steps;i++){
+    const j=Math.round(i*maxLz/steps);
+    labs.push('J.'+j);
+    if(useD){
+      dE.push(Math.round(employees.reduce((s,e)=>s+e.bt*12*Math.min(j,e.lz),0)));
+      dMA.push(j>0?Math.round(employees.reduce((s,e)=>s+fv(e.bt,Math.min(j,e.lz),e.rz/100),0)):0);
+      dAG.push(j>0?Math.round(employees.reduce((s,e)=>s+fv(e.bt,Math.min(j,e.lz),rk),0)):0);
+    } else {
+      dE.push(Math.round(g('r-bt')*12*Math.min(j,avgLz)*ma_count));
+      dMA.push(j>0?Math.round(fv(g('r-bt'),Math.min(j,avgLz),avgRz/100)*ma_count):0);
+      dAG.push(j>0?Math.round(fv(g('r-bt'),Math.min(j,avgLz),rk)*ma_count):0);
+    }
+  }
+  document.getElementById('rk-m1').textContent=fe(dMA[dMA.length-1]);
+  document.getElementById('rk-m1-sub').textContent='Ø '+fp(avgRz)+' p.a.';
+  document.getElementById('rk-m2').textContent=fe(dAG[dAG.length-1]);
+  document.getElementById('rk-m3').textContent='+'+fe(dAG[dAG.length-1]-dMA[dMA.length-1]);
+  if(rdChart)rdChart.destroy();
+  rdChart=new Chart(document.getElementById('rendChart'),{type:'line',data:{labels:labs,datasets:[
+    {label:'Eingezahlt',data:dE,borderColor:'#CBD5E0',borderDash:[4,4],borderWidth:1.5,pointRadius:0,fill:false},
+    {label:'MA-Rendite',data:dMA,borderColor:'#1A3A6E',borderWidth:2,pointRadius:0,fill:false},
+    {label:'AG-Rendite',data:dAG,borderColor:'#E8621A',borderWidth:2.5,pointRadius:0,fill:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fe(c.raw)}}},scales:{x:{ticks:{font:{size:10},color:'#8FA0B8',maxTicksLimit:8},grid:{color:'rgba(0,0,0,0.04)'}},y:{ticks:{font:{size:10},color:'#8FA0B8',callback:v=>fe(v)},grid:{color:'rgba(0,0,0,0.04)'}}}}});
+
+  // S5
+  renderEmployees();
+  if(hasMA&&useD){
+    const totalRente=employees.reduce((s,e)=>s+(e.pay==='rente'?fv(e.bt,e.lz,e.rz/100)/(e.rd*12):0),0);
+    document.getElementById('i5t').textContent=ma_count+' Mitarbeiter · Gesamt-Rente: '+Math.round(totalRente).toLocaleString('de-DE')+' €/Monat';
+    document.getElementById('i5x').textContent='Summe aller Rentenleistungen monatlich. Rentenphase und Auszahlungsart individuell je MA eingestellt.';
+  } else {
+    document.getElementById('i5t').textContent='Mitarbeiter eintragen für individuelle Berechnung';
+    document.getElementById('i5x').textContent='Mit dem Formular oben jeden Mitarbeiter einzeln erfassen — Rentenbeginnalter, Auszahlungsart und Renditezusage individuell einstellbar.';
+  }
+
+  // S6 Cashflow
+  buildCashflow(useD,ma_count,avgLz,rk,avgRz,g('r-bt'),steuer,gb);
+
+  // S7/S8 Summary
+  document.getElementById('sum-grid').innerHTML=[
+    {l:'Gesamtbeiträge',v:fe(gb),d:ma_count+' MA · Ø '+avgLz+' J.'},
+    {l:'Steuerersparnis',v:fe(steuer),d:Math.round(st*100)+' % Steuersatz'},
+    {l:'Spread-Gewinn'+(pwUnlocked&&costs>0?' (netto)':''),v:'+'+fe(displaySpread),d:fp(avgRz)+' → '+fp(rk*100)+(pwUnlocked&&costs>0?' · Kosten verrechnet':'')},
+    {l:'Gesamtvorteil',v:fe(steuer+displaySpread),d:'Steuer + Spread'},
+  ].map(i=>'<div class="si"><div class="sl">'+i.l+'</div><div class="sv">'+i.v+'</div><div class="sd">'+i.d+'</div></div>').join('');
+  document.getElementById('sum-text').textContent='Basis: '+ma_count+' Mitarbeiter, Gesamtbeiträge '+fe(gb)+'. Steuerersparnis '+fe(steuer)+' + Spread-Gewinn '+fe(displaySpread)+' = Gesamtvorteil '+fe(steuer+displaySpread)+'.';
+}
+
+function buildCashflow(useD,ma_count,avgLz,rk,avgRz,bt_per_ma,steuer,gb){
+  const curYear=new Date().getFullYear();
+  const maxYears=useD&&employees.length>0?Math.max(...employees.map(e=>e.lz+e.rd)):avgLz+20;
+  const years=[],inArr=[],outArr=[],spreadArr=[],cumArr=[];
+  let cum=0;
+  for(let y=0;y<=Math.min(maxYears+2,60);y++){
+    let inf=0,outf=0,spr=0;
+    if(useD&&employees.length>0){
+      employees.forEach(e=>{
+        if(y<e.lz){inf+=e.bt*12;const prevCap=y>0?fv(e.bt,y,rk):0;const curCap=fv(e.bt,y+1,rk);spr+=(curCap-prevCap)-e.bt*12;}
+        else{
+          const retY=y-e.lz;
+          if(e.pay==='rente'&&retY<e.rd){outf+=fv(e.bt,e.lz,e.rz/100)/(e.rd*12)*12;}
+          else if(e.pay==='kapital'&&retY===0){outf+=fv(e.bt,e.lz,e.rz/100);}
+        }
+      });
+    } else {
+      if(y<avgLz){inf+=bt_per_ma*12*ma_count;const prevCap=y>0?fv(bt_per_ma,y,rk)*ma_count:0;const curCap=fv(bt_per_ma,y+1,rk)*ma_count;spr+=(curCap-prevCap)-bt_per_ma*12*ma_count;}
+      else if(y<avgLz+20){outf+=fv(bt_per_ma,avgLz,avgRz/100)*ma_count/20;}
+    }
+    years.push(curYear+y);
+    inArr.push(Math.round(inf));
+    outArr.push(-Math.round(outf));
+    spreadArr.push(Math.round(spr));
+    cum+=inf+Math.max(0,spr)-outf;
+    cumArr.push(Math.max(0,Math.round(cum)));
+  }
+
+  // Metrics
+  const totalCap=useD&&employees.length>0?employees.reduce((s,e)=>s+fv(e.bt,e.lz,rk),0):fv(bt_per_ma,avgLz,rk)*ma_count;
+  const totalOut=Math.abs(outArr.reduce((a,b)=>a+b,0));
+  document.getElementById('cf-m1').textContent=fe(totalCap);
+  document.getElementById('cf-m2').textContent=fe(inArr.reduce((a,b)=>a+b,0));
+  document.getElementById('cf-m3').textContent=fe(totalOut);
+  document.getElementById('cf-m4').textContent=fe(Math.max(0,totalCap-totalOut));
+
+  if(cfChart)cfChart.destroy();
+  cfChart=new Chart(document.getElementById('cfChart'),{type:'bar',data:{labels:years,datasets:[
+    {label:'Kapitalaufbau',data:inArr,backgroundColor:'rgba(26,58,110,0.7)',borderRadius:2},
+    {label:'Spread',data:spreadArr,backgroundColor:'rgba(26,140,106,0.6)',borderRadius:2},
+    {label:'Auszahlung',data:outArr,backgroundColor:'rgba(192,57,43,0.7)',borderRadius:2},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fe(Math.abs(c.raw))}}},scales:{x:{stacked:true,ticks:{font:{size:9},color:'#8FA0B8',maxTicksLimit:12},grid:{display:false}},y:{stacked:true,ticks:{font:{size:9},color:'#8FA0B8',callback:v=>fe(Math.abs(v))},grid:{color:'rgba(0,0,0,0.04)'}}}}});
+
+  // Table
+  const tbl=document.getElementById('cf-table');
+  const ansparYears=years.filter((_,i)=>inArr[i]>0);
+  const renteYears=years.filter((_,i)=>outArr[i]<0);
+  let rows=`<thead><tr>
+    <th style="text-align:left">Jahr</th>
+    <th>Beitragseinz.</th>
+    <th>Spread-Gewinn</th>
+    <th>Kap. (MA-Zusage)</th>
+    <th>Kap. (AG-real)</th>
+    <th>Rentenabfluss</th>
+    <th>Kum. Kapital</th>
+  </tr></thead><tbody>`;
+  let ansparDone=false,renteDone=false;
+  years.forEach((yr,i)=>{
+    const hasIn=inArr[i]>0, hasOut=outArr[i]<0;
+    if(hasIn&&!ansparDone){rows+=`<tr class="phase-header"><td colspan="7">📈 Ansparphase</td></tr>`;ansparDone=true;}
+    if(!hasIn&&hasOut&&!renteDone){rows+=`<tr class="phase-header"><td colspan="7">📉 Rentenphase</td></tr>`;renteDone=true;}
+    if(!hasIn&&!hasOut)return;
+    const capMA_yr=useD&&employees.length>0?employees.reduce((s,e)=>s+fv(e.bt,Math.min(i,e.lz),e.rz/100),0):fv(bt_per_ma,Math.min(i,avgLz),avgRz/100)*ma_count;
+    const capAG_yr=useD&&employees.length>0?employees.reduce((s,e)=>s+fv(e.bt,Math.min(i,e.lz),rk),0):fv(bt_per_ma,Math.min(i,avgLz),rk)*ma_count;
+    rows+=`<tr>
+      <td>${yr}</td>
+      <td>${inArr[i]>0?fe(inArr[i]):'—'}</td>
+      <td class="${spreadArr[i]>0?'pos':''}">${spreadArr[i]>0?'+'+fe(spreadArr[i]):'—'}</td>
+      <td>${fe(capMA_yr)}</td>
+      <td>${fe(capAG_yr)}</td>
+      <td class="${outArr[i]<0?'neg':''}">${outArr[i]<0?'–'+fe(Math.abs(outArr[i])):'—'}</td>
+      <td>${fe(cumArr[i])}</td>
+    </tr>`;
+  });
+  rows+='</tbody>';
+  tbl.innerHTML=rows;
+
+  document.getElementById('i6t').textContent='Kapitalfluss über '+(years.length)+' Jahre dargestellt';
+  document.getElementById('i6x').textContent='Blaue Balken: jährliche Beitragseinzahlungen. Grün: Spread-Gewinn. Rot: Rentenauszahlungen. Tabelle unten zeigt MA-Zusage vs. AG-Kapital pro Jahr.';
+}
+
+// Init
+updateAll();
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});},{threshold:0.06});
+document.querySelectorAll('.fu').forEach(el=>obs.observe(el));
+const sids=['s1','s2','s3','s4','s5','s6','s7','s8','kontakt'];
+const nobs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){document.querySelectorAll('.ni').forEach(n=>n.classList.remove('act'));const a=document.querySelector('.ni[data-s="'+e.target.id+'"]');if(a)a.classList.add('act');}});},{threshold:0.25});
+sids.forEach(id=>{const el=document.getElementById(id);if(el)nobs.observe(el);});
+</script>
+</body>
+</html>
