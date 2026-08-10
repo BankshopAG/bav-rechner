@@ -229,10 +229,23 @@ footer{text-align:center;padding:1.5rem;font-size:10px;color:var(--txm);border-t
 }
 
 @media print{
-  @page{margin:1.5cm 1.6cm;size:A4 portrait;}
+  /* Seitenkasten = volles A4. Der optische Rand kommt AUSSCHLIESSLICH aus
+     .ps-page (padding) — sonst wird der 800px-Entwurf doppelt eingeengt und
+     vom Browser zusätzlich herunterskaliert. */
+  @page{margin:0;size:A4 portrait;}
+  /* Fluide Breiten statt fester mm: unter Chrome ergibt das durch margin:0
+     exakt 210mm, unter iOS-Safari (ignoriert @page, kein Skalierungsregler)
+     passt sich das Layout dem Druckbereich an statt überzulaufen. */
+  html,body{
+    width:auto!important;max-width:none!important;
+    margin:0!important;padding:0!important;
+    background:#fff!important;overflow:visible!important;
+  }
+  /* Farbflächen (Banner, Tabellenköpfe) auch ohne "Hintergrundgrafiken" drucken */
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
   /* Alles ausblenden außer Angebot */
   #top,#snav,#s1,#s2,#s3,#s4,#s6,#s7,#s8,
-  #uk-modul,#intern-modal,#intern-fab,#dlg-berater,
+  #uk-modul,#intern-modal,#intern-fab,#fab-wrap,#dlg-berater,#legal-note,
   #steuer-tab-wrap,#btn-steuer-tab,#dotierung-hinweis,
   #login-screen,#admin-panel,#admin-bar,
   .edot,.sdiv,footer,nav{display:none!important;}
@@ -241,21 +254,29 @@ footer{text-align:center;padding:1.5rem;font-size:10px;color:var(--txm);border-t
     position:static!important;
     visibility:visible!important;
     opacity:1!important;
-    width:100%!important;
+    width:100%!important;max-width:none!important;
     margin:0!important;padding:0!important;
   }
   #print-section *{visibility:visible!important;opacity:1!important;}
+  /* Angebot füllt die Seitenbreite — unter Chrome 210mm ≈ 794px, praktisch
+     identisch mit der Entwurfsbreite von 800px. */
+  .ps{max-width:none!important;width:100%!important;margin:0!important;}
+  .ps-page,.ps-page-auto{width:100%!important;padding:10mm 9mm 8mm!important;}
   /* Dotierung NIE drucken */
   #steuer-tab-wrap,#steuer-tab-wrap *,#dotierung-hinweis,
   #btn-steuer-tab,#uk-modul,#uk-modul *,
   .edot,.edot *{display:none!important;visibility:hidden!important;}
-  /* Seitenumbruch NUR nach ps-page, nie mittendrin */
-  .ps-page{page-break-after:always;break-after:page;page-break-inside:avoid;}
+  /* Seitenumbruch NUR nach ps-page. Kein break-inside:avoid — eine Seite, die
+     minimal höher als A4 ist, würde sonst komplett verschoben (Leerseite). */
+  .ps-page{page-break-after:always;break-after:page;}
   .ps-page-auto{page-break-after:auto;break-after:auto;}
   /* Tabellen sauber umbrechen */
   .ps-table{page-break-inside:auto;width:100%;}
   .ps-table thead{display:table-header-group;}
   .ps-table tr{page-break-inside:avoid;break-inside:avoid;}
+  /* Überschriften dürfen umbrechen — sonst sprengen 8 nowrap-Spalten die
+     Seitenbreite und Chrome skaliert das ganze Dokument herunter. */
+  .ps-table th{white-space:normal!important;}
   /* Keine Schatten, keine box-shadow */
   *{box-shadow:none!important;text-shadow:none!important;}
 }
@@ -638,7 +659,7 @@ footer{text-align:center;padding:1.5rem;font-size:10px;color:var(--txm);border-t
 </div>
 
 <!-- FLOATING INTERNAL BUTTON -->
-<div style="position:sticky;bottom:0;z-index:100;display:flex;justify-content:flex-end;padding:.75rem 1.5rem;pointer-events:none;">
+<div id="fab-wrap" style="position:sticky;bottom:0;z-index:100;display:flex;justify-content:flex-end;padding:.75rem 1.5rem;pointer-events:none;">
   <button id="intern-fab" onclick="openInternal()" title="Interne Kostenparameter" style="pointer-events:all;width:44px;height:44px;border-radius:50%;background:var(--navy);border:none;cursor:pointer;box-shadow:0 4px 16px rgba(15,37,68,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s;color:#fff;font-family:sans-serif;">🔒</button>
   <button onclick="resetAll()" title="Berechnung zurücksetzen" style="pointer-events:all;width:44px;height:44px;border-radius:50%;background:#3D5070;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(15,37,68,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s;color:#fff;font-family:sans-serif;">↺</button>
 </div>
@@ -795,7 +816,7 @@ footer{text-align:center;padding:1.5rem;font-size:10px;color:var(--txm);border-t
 </div>
 
 <!-- RECHTLICHE HINWEISE -->
-  <div style="margin:1.5rem 0 0;padding:1rem 1.25rem;background:rgba(15,37,68,0.04);border-radius:8px;border:1px solid rgba(15,37,68,0.1);font-size:10px;color:#6B7F9A;line-height:1.6">
+  <div id="legal-note" style="margin:1.5rem 0 0;padding:1rem 1.25rem;background:rgba(15,37,68,0.04);border-radius:8px;border:1px solid rgba(15,37,68,0.1);font-size:10px;color:#6B7F9A;line-height:1.6">
     <strong style="color:#0F2544;font-size:10px">&#9888; Rechtlicher Hinweis:</strong>
     Alle Berechnungen &#8212; insbesondere zur &sect; 4d-Dotierung, zu Kassenverm&ouml;gen, Zinsen und Steuererssparnissen &#8212; sind <strong>unverbindliche N&auml;herungs- und Sch&auml;tzwerte</strong> auf Basis vereinfachter Annahmen.
     Sie stellen <strong>keine Steuer- oder Rechtsberatung</strong> dar. Die CEB Bankshop AG ist als Finanzdienstleistungsvermittler t&auml;tig und erbringt ausschlie&szlig;lich Vermittlungsleistungen.
